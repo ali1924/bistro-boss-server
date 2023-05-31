@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
 app.use(cors());
@@ -44,9 +44,10 @@ async function run() {
 
         // add cart collection
 
-        // get specific data for email query
+        // get some data for email query
         app.get('/carts', async (req, res) => {
-            // const email = req.query.email;
+            const email = req.query.email;
+            console.log('email',email)
             if (!email) {
                 res.send([]);
             }
@@ -55,10 +56,18 @@ async function run() {
             res.send(result);
         })
 
+        // delete single cart data using delete api
+        app.delete('/carts/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: new ObjectId(id) };
+            const result = await cartsCollection.deleteOne(query);
+            res.send(result);
+        })
         // post single data
         app.post('/carts', async (req, res) => {
             const item = req.body;
-            console.log(item);
+            // console.log(item);
             const result = await cartsCollection.insertOne(item);
             res.send(result)
         })
