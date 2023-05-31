@@ -30,15 +30,24 @@ async function run() {
         const cartsCollection = client.db("bistroDb").collection('carts');
         const usersCollection = client.db("bistroDb").collection('users');
 
-        //users api
+        //users  related api
+        // post api for user login or sign up
         app.post('/users', async (req,res) => {
             const user = req.body;
-            console.log(user);
+            console.log('user:',user);
+            // for google sign in
+            const query = { email: user.email };
+            const existingUser = await usersCollection.findOne(query);
+            if (existingUser) {
+                return res.send({message:'user already exists'})
+            }
+            console.log('existing user:', existingUser);
+            // ********
             const result = await usersCollection.insertOne(user);
             res.send(result);
         })
 
-        // menu apis
+        // menu related apis
         // get all menu data
         app.get('/menu', async (req, res) => {
             const cursor = menuCollection.find();
