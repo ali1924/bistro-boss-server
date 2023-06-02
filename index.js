@@ -31,27 +31,43 @@ async function run() {
         const usersCollection = client.db("bistroDb").collection('users');
 
         //users  related api
-        // get all user
+        // get all user data
         app.get('/users', async (req, res) => {
             const result = await usersCollection.find().toArray();
             res.send(result);
         })
         // post api for user login or sign up
-        app.post('/users', async (req,res) => {
+        app.post('/users', async (req, res) => {
             const user = req.body;
-            console.log('user:',user);
-            // for google sign in
+            console.log(user);
             const query = { email: user.email };
             const existingUser = await usersCollection.findOne(query);
             if (existingUser) {
-                return res.send({message:'user already exists'})
+                return res.send({ message: 'user already exist' });
             }
-            console.log('existing user:', existingUser);
-            // ********
             const result = await usersCollection.insertOne(user);
             res.send(result);
         })
-
+        // delete user data
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: new ObjectId(id) };
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
+        })
+        // make admin from user data
+        app.patch('/users/admin/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    role:'admin',
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
         // menu related apis
         // get all menu data
         app.get('/menu', async (req, res) => {
